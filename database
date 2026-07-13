@@ -146,3 +146,24 @@ INSERT INTO ChiTietHoaDon (MaHoaDon, MaSanPham, SoLuong, DonGia) VALUES
 -- Đơn 5 (Chưa thanh toán): 1 ly Trà Sữa Trân Châu Hoàng Kim
 INSERT INTO ChiTietHoaDon (MaHoaDon, MaSanPham, SoLuong, DonGia) VALUES
 (5, 3, 1, 39000.0);
+
+-- 8. Tạo chỉ mục (Index) để tối ưu hóa tốc độ truy vấn
+CREATE INDEX IX_HoaDon_NgayTao_TrangThai ON HoaDon(NgayTao, TrangThai);
+CREATE INDEX IX_SanPham_TrangThai ON SanPham(TrangThai);
+
+-- 9. Bảng Khách hàng (KhachHang)
+CREATE TABLE KhachHang (
+    MaKhachHang INT IDENTITY(1,1) PRIMARY KEY,
+    HoTen NVARCHAR(100) NOT NULL,
+    SoDienThoai VARCHAR(15) UNIQUE NOT NULL,
+    Email VARCHAR(100) UNIQUE NULL,
+    DiemTichLuy INT DEFAULT 0 CHECK (DiemTichLuy >= 0),
+    TrangThai NVARCHAR(20) DEFAULT N'HoatDong', -- HoatDong, NgungHoatDong
+    NgayDangKy DATETIME DEFAULT GETDATE()
+);
+
+-- Chèn dữ liệu mẫu cho Khách hàng
+INSERT INTO KhachHang (HoTen, SoDienThoai, Email, DiemTichLuy) VALUES
+(N'Nguyễn Thị Mai', '0981112222', 'mai.nt@gmail.com', 150),
+(N'Phạm Văn Nam', '0973334444', 'nam.pv@gmail.com', 80),
+(N'Lê Hoàng Long', '0965556666', 'long.lh@gmail.com', 320);

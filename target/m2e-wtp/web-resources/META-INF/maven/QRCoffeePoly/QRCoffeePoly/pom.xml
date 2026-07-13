@@ -13,6 +13,13 @@
       <version>6.5.2.Final</version>
     </dependency>
 
+    <!-- Connection Pool HikariCP Integration -->
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-hikaricp</artifactId>
+      <version>6.5.2.Final</version>
+    </dependency>
+
     <!-- Microsoft JDBC Driver for SQL Server -->
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>

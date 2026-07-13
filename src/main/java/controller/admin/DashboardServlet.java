@@ -29,20 +29,36 @@ public class DashboardServlet extends HttpServlet {
         
         EntityManager em = JpaUtils.getEntityManager();
         try {
+            // Tính toán khoảng thời gian bắt đầu và kết thúc của tháng hiện tại để tối ưu câu truy vấn (SARGable)
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.set(java.util.Calendar.DAY_OF_MONTH, 1);
+            cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            cal.set(java.util.Calendar.MINUTE, 0);
+            cal.set(java.util.Calendar.SECOND, 0);
+            cal.set(java.util.Calendar.MILLISECOND, 0);
+            java.util.Date startDate = cal.getTime();
+
+            cal.add(java.util.Calendar.MONTH, 1);
+            java.util.Date endDate = cal.getTime();
+
             // 1. Thống kê Doanh thu tháng này (đơn đã thanh toán trong tháng/năm hiện tại)
             String jpqlRevenue = "SELECT COALESCE(SUM(o.tongTien), 0.0) FROM Order o " +
                                  "WHERE o.trangThai = 'DaThanhToan' " +
-                                 "AND YEAR(o.ngayTao) = YEAR(CURRENT_DATE) " +
-                                 "AND MONTH(o.ngayTao) = MONTH(CURRENT_DATE)";
-            Double totalRevenue = em.createQuery(jpqlRevenue, Double.class).getSingleResult();
+                                 "AND o.ngayTao >= :startDate AND o.ngayTao < :endDate";
+            Double totalRevenue = em.createQuery(jpqlRevenue, Double.class)
+                                    .setParameter("startDate", startDate)
+                                    .setParameter("endDate", endDate)
+                                    .getSingleResult();
             request.setAttribute("totalRevenue", totalRevenue);
 
             // 2. Số lượng đơn hàng đã giao (thanh toán thành công trong tháng)
             String jpqlOrdersCount = "SELECT COUNT(o) FROM Order o " +
                                      "WHERE o.trangThai = 'DaThanhToan' " +
-                                     "AND YEAR(o.ngayTao) = YEAR(CURRENT_DATE) " +
-                                     "AND MONTH(o.ngayTao) = MONTH(CURRENT_DATE)";
-            Long ordersCount = em.createQuery(jpqlOrdersCount, Long.class).getSingleResult();
+                                     "AND o.ngayTao >= :startDate AND o.ngayTao < :endDate";
+            Long ordersCount = em.createQuery(jpqlOrdersCount, Long.class)
+                                 .setParameter("startDate", startDate)
+                                 .setParameter("endDate", endDate)
+                                 .getSingleResult();
             request.setAttribute("ordersCount", ordersCount);
 
             // 3. Số lượng món trong thực đơn
@@ -60,8 +76,8 @@ public class DashboardServlet extends HttpServlet {
             request.setAttribute("activeTables", activeTables);
             request.setAttribute("totalTables", totalTables);
 
-            // 5. Giao dịch gần đây (Lấy 5 hóa đơn mới nhất)
-            String jpqlTransactions = "SELECT o FROM Order o ORDER BY o.ngayTao DESC";
+            // 5. Giao dịch gần đây (Lấy 5 hóa đơn mới nhất, dùng JOIN FETCH để tránh lỗi N+1 SELECT)
+            String jpqlTransactions = "SELECT o FROM Order o LEFT JOIN FETCH o.table LEFT JOIN FETCH o.user ORDER BY o.ngayTao DESC";
             List<Order> recentOrders = em.createQuery(jpqlTransactions, Order.class)
                                          .setMaxResults(5)
                                          .getResultList();

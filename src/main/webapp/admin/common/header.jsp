@@ -39,13 +39,13 @@
                     <i class="bi bi-people"></i> Quản lý nhân viên
                 </a>
             </li>
-            <li class="disabled">
-                <a href="#" class="opacity-50" style="cursor: not-allowed;">
+            <li class="${requestScope['javax.servlet.forward.servlet_path'] == '/admin/customers' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/customers">
                     <i class="bi bi-person-badge"></i> Quản lý khách hàng
                 </a>
             </li>
-            <li class="disabled">
-                <a href="#" class="opacity-50" style="cursor: not-allowed;">
+            <li class="${requestScope['javax.servlet.forward.servlet_path'] == '/admin/revenue' ? 'active' : ''}">
+                <a href="${pageContext.request.contextPath}/admin/revenue">
                     <i class="bi bi-cash-coin"></i> Báo cáo doanh thu
                 </a>
             </li>
