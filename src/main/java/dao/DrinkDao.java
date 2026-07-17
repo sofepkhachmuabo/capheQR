@@ -30,6 +30,22 @@ public class DrinkDao {
     }
 
     /**
+     * Lấy danh sách đồ uống đang kinh doanh (TrangThai = 'DangBan').
+     * 
+     * @return List<Drink>
+     */
+    public List<Drink> findActive() {
+        EntityManager em = JpaUtils.getEntityManager();
+        try {
+            String jpql = "SELECT d FROM Drink d LEFT JOIN FETCH d.category WHERE d.trangThai = 'DangBan'";
+            TypedQuery<Drink> query = em.createQuery(jpql, Drink.class);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
      * Tìm đồ uống theo mã định danh.
      * 
      * @param id Mã đồ uống

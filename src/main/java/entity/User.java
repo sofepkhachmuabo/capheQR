@@ -70,7 +70,7 @@ public class User implements Serializable {
     }
 
     public String getEmail() {
-        return email;
+        return email != null ? email.trim() : null;
     }
 
     public void setEmail(String email) {
@@ -86,7 +86,7 @@ public class User implements Serializable {
     }
 
     public String getMatKhau() {
-        return matKhau;
+        return matKhau != null ? matKhau.trim() : null;
     }
 
     public void setMatKhau(String matKhau) {
@@ -94,7 +94,7 @@ public class User implements Serializable {
     }
 
     public String getTrangThai() {
-        return trangThai;
+        return trangThai != null ? trangThai.trim() : null;
     }
 
     public void setTrangThai(String trangThai) {

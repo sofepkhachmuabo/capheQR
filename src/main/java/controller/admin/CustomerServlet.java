@@ -107,6 +107,10 @@ public class CustomerServlet extends HttpServlet {
         String diemStr = request.getParameter("diemTichLuy");
         String trangThai = request.getParameter("trangThai");
 
+        if (email != null && email.trim().isEmpty()) {
+            email = null;
+        }
+
         int diemTichLuy = 0;
         if (diemStr != null && !diemStr.trim().isEmpty()) {
             diemTichLuy = Integer.parseInt(diemStr);
@@ -158,6 +162,10 @@ public class CustomerServlet extends HttpServlet {
         String email = request.getParameter("email");
         String diemStr = request.getParameter("diemTichLuy");
         String trangThai = request.getParameter("trangThai");
+
+        if (email != null && email.trim().isEmpty()) {
+            email = null;
+        }
 
         int diemTichLuy = 0;
         if (diemStr != null && !diemStr.trim().isEmpty()) {

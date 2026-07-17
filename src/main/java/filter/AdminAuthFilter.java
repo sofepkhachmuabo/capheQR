@@ -34,12 +34,16 @@ public class AdminAuthFilter implements Filter {
         boolean isLoginRequest = requestURI.equals(loginURI) || requestURI.endsWith("login.jsp");
         boolean isCssRequest = requestURI.contains("/admin/css/");
 
-        // Kiểm tra xem admin đã đăng nhập chưa (thông tin đăng nhập lưu trong session)
+        // Kiểm tra xem người dùng đã đăng nhập chưa và có vai trò là ADMIN không
         boolean loggedIn = (session != null && session.getAttribute("adminUser") != null);
+        boolean isAdmin = loggedIn && "ADMIN".equals(session.getAttribute("userRole"));
 
-        if (loggedIn || isLoginRequest || isCssRequest) {
+        if ((loggedIn && isAdmin) || isLoginRequest || isCssRequest) {
             // Cho phép tiếp tục xử lý yêu cầu
             chain.doFilter(request, response);
+        } else if (loggedIn && !isAdmin) {
+            // Đã đăng nhập nhưng không phải ADMIN (là Nhân viên): Chuyển hướng đến trang nhận đơn của nhân viên
+            httpResponse.sendRedirect(httpRequest.getContextPath() + "/staff/orders");
         } else {
             // Chưa đăng nhập: Chuyển hướng về trang đăng nhập
             httpResponse.sendRedirect(loginURI);

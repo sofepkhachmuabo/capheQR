@@ -46,18 +46,49 @@
                         </thead>
                         <tbody>
                             <c:forEach var="cust" items="${customers}">
+                                <%
+                                    entity.Customer c = (entity.Customer) pageContext.getAttribute("cust");
+                                    
+                                    // Che giấu số điện thoại an toàn
+                                    String maskedPhone = "";
+                                    if (c != null && c.getSoDienThoai() != null) {
+                                        String phone = c.getSoDienThoai().trim();
+                                        int len = phone.length();
+                                        if (len > 6) {
+                                            maskedPhone = phone.substring(0, 3) + "****" + phone.substring(len - 3);
+                                        } else {
+                                            maskedPhone = "****";
+                                        }
+                                    }
+                                    pageContext.setAttribute("maskedPhone", maskedPhone);
+                                    
+                                    // Che giấu họ tên an toàn
+                                    String maskedName = "";
+                                    if (c != null && c.getHoTen() != null) {
+                                        String name = c.getHoTen().trim();
+                                        String[] words = name.split("\\s+");
+                                        if (words.length > 2) {
+                                            maskedName = words[0] + " * " + words[words.length - 1];
+                                        } else if (words.length == 2) {
+                                            maskedName = words[0] + " *";
+                                        } else if (words.length == 1) {
+                                            maskedName = words[0];
+                                        }
+                                    }
+                                    pageContext.setAttribute("maskedName", maskedName);
+                                %>
                                 <tr>
                                     <td>
                                         <span class="fw-bold text-secondary">#${cust.maKhachHang}</span>
                                     </td>
                                     <td>
-                                        <div class="fw-bold text-dark">${cust.hoTen}</div>
+                                        <div class="fw-bold text-dark">${maskedName}</div>
                                         <div class="text-muted" style="font-size: 0.85rem;">
                                             ${not empty cust.email ? cust.email : 'Chưa cập nhật email'}
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="fw-semibold text-secondary">${cust.soDienThoai}</span>
+                                        <span class="fw-semibold text-secondary">${maskedPhone}</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge bg-warning text-dark fw-bold rounded-pill" style="font-size: 0.9rem;">

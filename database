@@ -2,15 +2,24 @@
 -- Hệ quản trị cơ sở dữ liệu: Microsoft SQL Server
 -- Tên cơ sở dữ liệu: CoffeeShopPOS
 
+IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'CoffeeShopPOS')
+BEGIN
+    CREATE DATABASE CoffeeShopPOS;
+END;
+GO
+
+USE CoffeeShopPOS;
+GO
+
 -- Xóa các bảng cũ nếu tồn tại (theo thứ tự khóa ngoại để tránh lỗi)
--- DROP TABLE IF EXISTS ThanhToan;
--- DROP TABLE IF EXISTS ChiTietHoaDon;
--- DROP TABLE IF EXISTS HoaDon;
--- DROP TABLE IF EXISTS Ban;
--- DROP TABLE IF EXISTS NguoiDung;
--- DROP TABLE IF EXISTS VaiTro;
--- DROP TABLE IF EXISTS SanPham;
--- DROP TABLE IF EXISTS DanhMuc;
+DROP TABLE IF EXISTS ChiTietHoaDon;
+DROP TABLE IF EXISTS HoaDon;
+DROP TABLE IF EXISTS Ban;
+DROP TABLE IF EXISTS NguoiDung;
+DROP TABLE IF EXISTS VaiTro;
+DROP TABLE IF EXISTS SanPham;
+DROP TABLE IF EXISTS DanhMuc;
+DROP TABLE IF EXISTS KhachHang;
 
 -- 1. Bảng Vai trò (VaiTro)
 CREATE TABLE VaiTro (
@@ -55,19 +64,31 @@ CREATE TABLE SanPham (
     MaDanhMuc INT FOREIGN KEY REFERENCES DanhMuc(MaDanhMuc) ON DELETE SET NULL
 );
 
--- 6. Bảng Hóa đơn (HoaDon)
+-- 6. Bảng Khách hàng (KhachHang)
+CREATE TABLE KhachHang (
+    MaKhachHang INT IDENTITY(1,1) PRIMARY KEY,
+    HoTen NVARCHAR(100) NOT NULL,
+    SoDienThoai VARCHAR(15) UNIQUE NOT NULL,
+    Email VARCHAR(100) NULL, -- Bỏ UNIQUE tại cột này để dùng Filtered Index phía dưới
+    DiemTichLuy INT DEFAULT 0 CHECK (DiemTichLuy >= 0),
+    TrangThai NVARCHAR(20) DEFAULT N'HoatDong', -- HoatDong, NgungHoatDong
+    NgayDangKy DATETIME DEFAULT GETDATE()
+);
+
+-- 7. Bảng Hóa đơn (HoaDon)
 CREATE TABLE HoaDon (
     MaHoaDon INT IDENTITY(1,1) PRIMARY KEY,
     NgayTao DATETIME DEFAULT GETDATE(),
     MaBan INT NULL FOREIGN KEY REFERENCES Ban(MaBan) ON DELETE SET NULL,
     MaNguoiDung INT NULL FOREIGN KEY REFERENCES NguoiDung(MaNguoiDung) ON DELETE SET NULL,
+    MaKhachHang INT NULL FOREIGN KEY REFERENCES KhachHang(MaKhachHang) ON DELETE SET NULL,
     TongTien DECIMAL(18,2) NOT NULL DEFAULT 0 CHECK (TongTien >= 0),
     TrangThai NVARCHAR(50) DEFAULT N'ChoThanhToan', -- ChoThanhToan, DaThanhToan, DaHuy
     LoaiHoaDon NVARCHAR(20) DEFAULT N'TaiCho', -- TaiCho, MangVe
     GhiChu NVARCHAR(255)
 );
 
--- 7. Bảng Chi tiết hóa đơn (ChiTietHoaDon)
+-- 8. Bảng Chi tiết hóa đơn (ChiTietHoaDon)
 CREATE TABLE ChiTietHoaDon (
     MaChiTiet INT IDENTITY(1,1) PRIMARY KEY,
     MaHoaDon INT FOREIGN KEY REFERENCES HoaDon(MaHoaDon) ON DELETE CASCADE,
@@ -116,14 +137,20 @@ INSERT INTO Ban (TenBan, MaCodeQR, TrangThai) VALUES
 (N'Bàn 7', 'TABLE_07', 'Trong'),
 (N'Bàn 8', 'TABLE_08', 'CoKhach');
 
+-- Chèn dữ liệu mẫu cho Khách hàng
+INSERT INTO KhachHang (HoTen, SoDienThoai, Email, DiemTichLuy) VALUES
+(N'Nguyễn Thị Mai', '0981112222', 'mai.nt@gmail.com', 150),
+(N'Phạm Văn Nam', '0973334444', 'nam.pv@gmail.com', 80),
+(N'Lê Hoàng Long', '0965556666', 'long.lh@gmail.com', 320);
+
 -- Chèn hóa đơn mẫu trong tháng hiện tại (Giả định tháng hiện tại là 06/2026 hoặc thời điểm hiện tại)
 -- LƯU Ý: Lệnh GETDATE() tự lấy thời gian hiện tại trên máy của bạn
-INSERT INTO HoaDon (NgayTao, MaBan, MaNguoiDung, TongTien, TrangThai, LoaiHoaDon) VALUES
-(GETDATE(), 1, 2, 58000.0, N'DaThanhToan', N'TaiCho'),
-(GETDATE(), 3, 2, 117000.0, N'DaThanhToan', N'TaiCho'),
-(GETDATE(), 8, 3, 35000.0, N'DaThanhToan', N'TaiCho'),
-(DATEADD(day, -1, GETDATE()), 2, 3, 67000.0, N'DaThanhToan', N'TaiCho'), -- Đơn ngày hôm qua
-(GETDATE(), 5, 2, 39000.0, N'ChoThanhToan', N'TaiCho'); -- Đơn chưa thanh toán
+INSERT INTO HoaDon (NgayTao, MaBan, MaNguoiDung, MaKhachHang, TongTien, TrangThai, LoaiHoaDon) VALUES
+(GETDATE(), 1, 2, 1, 58000.0, N'DaThanhToan', N'TaiCho'),
+(GETDATE(), 3, 2, 2, 117000.0, N'DaThanhToan', N'TaiCho'),
+(GETDATE(), 8, 3, 3, 35000.0, N'DaThanhToan', N'TaiCho'),
+(DATEADD(day, -1, GETDATE()), 2, 3, NULL, 67000.0, N'DaThanhToan', N'TaiCho'), -- Đơn ngày hôm qua
+(GETDATE(), 5, 2, NULL, 39000.0, N'ChoThanhToan', N'TaiCho'); -- Đơn chưa thanh toán
 
 -- Chèn Chi tiết hóa đơn tương ứng
 -- Đơn 1 (58,000đ): 2 ly Cà Phê Sữa Đá (29,000đ * 2)
@@ -147,23 +174,7 @@ INSERT INTO ChiTietHoaDon (MaHoaDon, MaSanPham, SoLuong, DonGia) VALUES
 INSERT INTO ChiTietHoaDon (MaHoaDon, MaSanPham, SoLuong, DonGia) VALUES
 (5, 3, 1, 39000.0);
 
--- 8. Tạo chỉ mục (Index) để tối ưu hóa tốc độ truy vấn
+-- 9. Tạo chỉ mục (Index) để tối ưu hóa tốc độ truy vấn
 CREATE INDEX IX_HoaDon_NgayTao_TrangThai ON HoaDon(NgayTao, TrangThai);
 CREATE INDEX IX_SanPham_TrangThai ON SanPham(TrangThai);
-
--- 9. Bảng Khách hàng (KhachHang)
-CREATE TABLE KhachHang (
-    MaKhachHang INT IDENTITY(1,1) PRIMARY KEY,
-    HoTen NVARCHAR(100) NOT NULL,
-    SoDienThoai VARCHAR(15) UNIQUE NOT NULL,
-    Email VARCHAR(100) UNIQUE NULL,
-    DiemTichLuy INT DEFAULT 0 CHECK (DiemTichLuy >= 0),
-    TrangThai NVARCHAR(20) DEFAULT N'HoatDong', -- HoatDong, NgungHoatDong
-    NgayDangKy DATETIME DEFAULT GETDATE()
-);
-
--- Chèn dữ liệu mẫu cho Khách hàng
-INSERT INTO KhachHang (HoTen, SoDienThoai, Email, DiemTichLuy) VALUES
-(N'Nguyễn Thị Mai', '0981112222', 'mai.nt@gmail.com', 150),
-(N'Phạm Văn Nam', '0973334444', 'nam.pv@gmail.com', 80),
-(N'Lê Hoàng Long', '0965556666', 'long.lh@gmail.com', 320);
+CREATE UNIQUE NONCLUSTERED INDEX UX_KhachHang_Email ON KhachHang(Email) WHERE Email IS NOT NULL;

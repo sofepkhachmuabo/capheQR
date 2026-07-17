@@ -44,6 +44,13 @@ public class LoginServlet extends HttpServlet {
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        if (email != null) {
+            email = email.trim();
+        }
+        if (password != null) {
+            password = password.trim();
+        }
+
         dao.UserDao userDao = new dao.UserDao();
         entity.User user = userDao.findByEmail(email);
 
@@ -54,9 +61,18 @@ public class LoginServlet extends HttpServlet {
             session.setAttribute("adminUser", email);
             session.setAttribute("adminName", user.getHoTen());
             session.setAttribute("adminAvatar", user.getHinhAnh());
+            
+            // Thiết lập vai trò người dùng và thời hạn session vô thời hạn cho nhân viên
+            String role = (user.getRole() != null) ? user.getRole().getMaVaiTro() : "NHANVIEN";
+            session.setAttribute("userRole", role);
+            session.setMaxInactiveInterval(-1); // Session vô thời hạn (không tự out khi đang làm việc)
 
-            // Chuyển hướng tới trang Dashboard
-            response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            // Chuyển hướng thông minh dựa vào vai trò
+            if ("ADMIN".equals(role)) {
+                response.sendRedirect(request.getContextPath() + "/admin/dashboard");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/staff/orders");
+            }
         } else {
             // Đăng nhập thất bại: Quay lại trang đăng nhập và hiển thị lỗi
             request.setAttribute("errorMessage", "Email, mật khẩu không chính xác hoặc tài khoản đã bị khóa!");

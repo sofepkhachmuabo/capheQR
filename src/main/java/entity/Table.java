@@ -60,7 +60,7 @@ public class Table implements Serializable {
     }
 
     public String getTrangThai() {
-        return trangThai;
+        return trangThai != null ? trangThai.trim() : null;
     }
 
     public void setTrangThai(String trangThai) {

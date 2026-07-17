@@ -91,7 +91,7 @@ public class Customer implements Serializable {
     }
 
     public String getTrangThai() {
-        return trangThai;
+        return trangThai != null ? trangThai.trim() : null;
     }
 
     public void setTrangThai(String trangThai) {
@@ -104,5 +104,54 @@ public class Customer implements Serializable {
 
     public void setNgayDangKy(Date ngayDangKy) {
         this.ngayDangKy = ngayDangKy;
+    }
+
+    // Các hàm Getter phụ trợ để bảo mật che giấu thông tin hiển thị (Masking)
+    public String getMaskedSoDienThoai() {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return "";
+        }
+        String cleanPhone = soDienThoai.trim();
+        int len = cleanPhone.length();
+        if (len <= 6) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < len; i++) {
+                sb.append("*");
+            }
+            return sb.toString();
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(cleanPhone.substring(0, 3));
+        for (int i = 0; i < len - 6; i++) {
+            sb.append("*");
+        }
+        sb.append(cleanPhone.substring(len - 3));
+        return sb.toString();
+    }
+
+    public String getMaskedHoTen() {
+        if (hoTen == null || hoTen.trim().isEmpty()) {
+            return "";
+        }
+        String[] words = hoTen.trim().split("\\s+");
+        if (words.length == 0) {
+            return "";
+        }
+        if (words.length == 1) {
+            String w = words[0];
+            if (w.length() <= 1) {
+                return "*";
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append(w.charAt(0));
+            for (int i = 1; i < w.length(); i++) {
+                sb.append("*");
+            }
+            return sb.toString();
+        }
+        if (words.length == 2) {
+            return words[0] + " *";
+        }
+        return words[0] + " * " + words[words.length - 1];
     }
 }

@@ -42,6 +42,10 @@ public class Order implements Serializable {
     @JoinColumn(name = "MaNguoiDung")
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "MaKhachHang")
+    private Customer customer;
+
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 
@@ -58,6 +62,14 @@ public class Order implements Serializable {
     }
 
     // Getters and Setters
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
     public int getMaHoaDon() {
         return maHoaDon;
     }
@@ -83,7 +95,7 @@ public class Order implements Serializable {
     }
 
     public String getTrangThai() {
-        return trangThai;
+        return trangThai != null ? trangThai.trim() : null;
     }
 
     public void setTrangThai(String trangThai) {
