@@ -27,7 +27,7 @@ public class Drink implements Serializable {
     @Column(name = "HinhAnh", length = 2000)
     private String hinhAnh;
 
-    @Column(name = "MoTa", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "MoTa", columnDefinition = "TEXT")
     private String moTa;
 
     @Column(name = "TrangThai", length = 20)

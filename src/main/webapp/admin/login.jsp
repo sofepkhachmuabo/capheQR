@@ -52,10 +52,6 @@
                 <i class="bi bi-box-arrow-in-right me-2"></i>Đăng Nhập
             </button>
         </form>
-
-        <div class="text-center mt-4">
-            <small class="text-muted">Tài khoản thử nghiệm: <br><strong>admin@qrcoffee.com</strong> / <strong>admin123</strong></small>
-        </div>
     </div>
 </div>
 

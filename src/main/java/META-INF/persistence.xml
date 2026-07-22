@@ -10,21 +10,27 @@
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
         <properties>
-            <!-- Thông tin kết nối SQL Server -->
-            <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:1433;databaseName=CoffeeShopPOS;encrypt=true;trustServerCertificate=true;" />
-            <property name="jakarta.persistence.jdbc.user" value="sa" />
-            <property name="jakarta.persistence.jdbc.password" value="12345" />
+            <!-- Thông tin kết nối Supabase PostgreSQL Pooler (Hỗ trợ IPv4) -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver" />
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require" />
+            <property name="jakarta.persistence.jdbc.user" value="postgres.mbtxuxrgdqqmgulbkqwi" />
+            <property name="jakarta.persistence.jdbc.password" value="Haimtts03134@" />
 
-            <!-- Cấu hình Hibernate -->
-            <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2012Dialect" />
+            <property name="hibernate.connection.driver_class" value="org.postgresql.Driver" />
+            <property name="hibernate.connection.url" value="jdbc:postgresql://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?sslmode=require" />
+            <property name="hibernate.connection.username" value="postgres.mbtxuxrgdqqmgulbkqwi" />
+            <property name="hibernate.connection.password" value="Haimtts03134@" />
+
+            <!-- Cấu hình Schema & Dialect cho PostgreSQL -->
+            <property name="hibernate.default_schema" value="public" />
+            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
-            <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="hibernate.hbm2ddl.auto" value="none" />
 
             <!-- Cấu hình Connection Pool HikariCP -->
             <property name="hibernate.connection.provider_class" value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider" />
-            <property name="hibernate.hikari.minimumIdle" value="5" />
+            <property name="hibernate.hikari.minimumIdle" value="2" />
             <property name="hibernate.hikari.maximumPoolSize" value="10" />
             <property name="hibernate.hikari.idleTimeout" value="30000" />
             <property name="hibernate.hikari.connectionTimeout" value="20000" />

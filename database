@@ -178,3 +178,40 @@ INSERT INTO ChiTietHoaDon (MaHoaDon, MaSanPham, SoLuong, DonGia) VALUES
 CREATE INDEX IX_HoaDon_NgayTao_TrangThai ON HoaDon(NgayTao, TrangThai);
 CREATE INDEX IX_SanPham_TrangThai ON SanPham(TrangThai);
 CREATE UNIQUE NONCLUSTERED INDEX UX_KhachHang_Email ON KhachHang(Email) WHERE Email IS NOT NULL;
+
+-- ===================================================
+-- 10. CÁC ĐOẠN MÃ TRUY VẤN TẤT CẢ DỮ LIỆU TỪ CÁC BẢNG
+-- ===================================================
+
+-- Truy vấn cơ bản tất cả các bảng
+SELECT * FROM VaiTro;
+SELECT * FROM NguoiDung;
+SELECT * FROM Ban;
+SELECT * FROM DanhMuc;
+SELECT * FROM SanPham;
+SELECT * FROM KhachHang;
+SELECT * FROM HoaDon;
+SELECT * FROM ChiTietHoaDon;
+
+-- Truy vấn kết hợp (JOIN) để lấy thông tin chi tiết đầy đủ
+-- a. Thông tin Người dùng kèm Vai trò
+SELECT nd.MaNguoiDung, nd.HoTen, nd.Email, nd.SoDienThoai, nd.TrangThai, vt.TenVaiTro
+FROM NguoiDung nd
+LEFT JOIN VaiTro vt ON nd.MaVaiTro = vt.MaVaiTro;
+
+-- b. Thông tin Sản phẩm kèm Danh mục
+SELECT sp.MaSanPham, sp.TenSanPham, sp.GiaCoBan, sp.HinhAnh, sp.TrangThai, dm.TenDanhMuc
+FROM SanPham sp
+LEFT JOIN DanhMuc dm ON sp.MaDanhMuc = dm.MaDanhMuc;
+
+-- c. Thông tin Hóa đơn chi tiết (bao gồm Tên Bàn, NhanVien, KhachHang)
+SELECT hd.MaHoaDon, hd.NgayTao, b.TenBan, nd.HoTen AS TenNhanVien, kh.HoTen AS TenKhachHang, hd.TongTien, hd.TrangThai, hd.LoaiHoaDon
+FROM HoaDon hd
+LEFT JOIN Ban b ON hd.MaBan = b.MaBan
+LEFT JOIN NguoiDung nd ON hd.MaNguoiDung = nd.MaNguoiDung
+LEFT JOIN KhachHang kh ON hd.MaKhachHang = kh.MaKhachHang;
+
+-- d. Thông tin Chi tiết từng Hóa đơn kèm Tên Sản Phẩm
+SELECT cthd.MaChiTiet, cthd.MaHoaDon, sp.TenSanPham, cthd.SoLuong, cthd.DonGia, (cthd.SoLuong * cthd.DonGia) AS ThanhTien
+FROM ChiTietHoaDon cthd
+JOIN SanPham sp ON cthd.MaSanPham = sp.MaSanPham;
