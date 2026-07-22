@@ -64,6 +64,12 @@
                     <form action="${pageContext.request.contextPath}/staff/tables" method="post" class="d-grid gap-2">
                         <input type="hidden" name="tableId" value="${tbl.maBan}">
                         
+                        <!-- Nút xem và in mã QR Code đặt món cho bàn -->
+                        <button type="button" class="btn btn-outline-warning text-dark py-1.5 fw-bold mb-2" 
+                                onclick="showQrModal('${tbl.tenBan}', '${tbl.maCodeQR}')" style="border-radius: 8px;">
+                            <i class="bi bi-qr-code-scan me-1"></i> Xem & In Mã QR
+                        </button>
+
                         <c:choose>
                             <c:when test="${tbl.trangThai == 'Trong'}">
                                 <input type="hidden" name="status" value="CoKhach">
@@ -99,6 +105,35 @@
     </c:forEach>
 </div>
 
+<!-- Modal Hiển thị & In QR Code Đặt Món -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered text-center">
+        <div class="modal-content shadow border-0" style="border-radius: 16px;">
+            <div class="modal-header border-0 bg-dark text-warning p-3">
+                <h5 class="modal-title fw-bold" id="qrModalTitle"><i class="bi bi-qr-code me-2"></i>Mã QR Đặt Món</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="printableQrArea">
+                <div class="p-3 border rounded-3 bg-light d-inline-block shadow-sm mb-3">
+                    <h3 class="fw-bold text-dark mb-1" id="qrTableName">Bàn 1</h3>
+                    <p class="text-muted small mb-3">Quét mã QR để mở thực đơn & đặt món tại bàn</p>
+                    <img id="qrImage" src="" alt="QR Code" class="img-fluid rounded shadow-sm" style="width: 220px; height: 220px; object-fit: contain;">
+                    <div class="mt-3">
+                        <small class="text-secondary d-block">Đường dẫn quét đặt món:</small>
+                        <code class="text-break small fw-bold text-primary" id="qrFullUrl">http://...</code>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 p-3 pt-0 justify-content-center gap-2">
+                <button type="button" class="btn btn-secondary px-4 fw-semibold" data-bs-dismiss="modal" style="border-radius: 8px;">Đóng</button>
+                <button type="button" class="btn btn-warning px-4 fw-bold text-dark" onclick="window.print()" style="border-radius: 8px;">
+                    <i class="bi bi-printer me-1"></i> In Mã QR Bàn
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Form ẩn dùng để gửi yêu cầu chuyển trạng thái bảo trì -->
 <form id="maintenanceForm" action="${pageContext.request.contextPath}/staff/tables" method="post" style="display: none;">
     <input type="hidden" name="tableId" id="maintenanceTableId">
@@ -111,6 +146,22 @@
             document.getElementById("maintenanceTableId").value = tableId;
             document.getElementById("maintenanceForm").submit();
         }
+    }
+
+    function showQrModal(tableName, qrCode) {
+        document.getElementById('qrTableName').textContent = tableName;
+        document.getElementById('qrModalTitle').innerHTML = '<i class="bi bi-qr-code me-2"></i>Mã QR Đặt Món - ' + tableName;
+        
+        // Tạo đường dẫn URL đầy đủ tới trang menu của bàn
+        const baseUrl = window.location.protocol + "//" + window.location.host + "${pageContext.request.contextPath}/menu?table=" + qrCode;
+        document.getElementById('qrFullUrl').textContent = baseUrl;
+        
+        // Tạo ảnh QR Code động
+        const qrApiUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(baseUrl);
+        document.getElementById('qrImage').src = qrApiUrl;
+        
+        const modal = new bootstrap.Modal(document.getElementById('qrModal'));
+        modal.show();
     }
 </script>
 

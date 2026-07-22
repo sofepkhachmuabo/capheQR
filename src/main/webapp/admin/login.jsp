@@ -40,11 +40,14 @@
                 <label for="email"><i class="bi bi-envelope me-2"></i>Địa chỉ Email</label>
             </div>
 
-            <!-- Password Input -->
-            <div class="form-floating mb-4">
-                <input type="password" class="form-control" id="password" name="password" 
+            <!-- Password Input với Nút Ẩn/Hiện Mật khẩu -->
+            <div class="form-floating mb-4 position-relative">
+                <input type="password" class="form-control pe-5" id="password" name="password" 
                        placeholder="Mật khẩu" required>
                 <label for="password"><i class="bi bi-lock me-2"></i>Mật khẩu</label>
+                <button type="button" id="togglePassword" class="btn border-0 position-absolute end-0 top-50 translate-middle-y me-2 text-muted" style="z-index: 10; background: transparent;">
+                    <i class="bi bi-eye-slash fs-5" id="toggleIcon"></i>
+                </button>
             </div>
 
             <!-- Submit Button -->
@@ -57,5 +60,29 @@
 
 <!-- Bootstrap 5 JS Bundle CDN -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script Xử lý Ẩn/Hiện Mật Khẩu -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const togglePassword = document.getElementById("togglePassword");
+        const passwordInput = document.getElementById("password");
+        const toggleIcon = document.getElementById("toggleIcon");
+
+        if (togglePassword && passwordInput && toggleIcon) {
+            togglePassword.addEventListener("click", function () {
+                const isPassword = passwordInput.getAttribute("type") === "password";
+                passwordInput.setAttribute("type", isPassword ? "text" : "password");
+                
+                if (isPassword) {
+                    toggleIcon.classList.remove("bi-eye-slash");
+                    toggleIcon.classList.add("bi-eye");
+                } else {
+                    toggleIcon.classList.remove("bi-eye");
+                    toggleIcon.classList.add("bi-eye-slash");
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>
